@@ -1,46 +1,45 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
-import AppRouter, { history } from './routes/AppRouter'
+import AppRouter, { history } from './routers/AppRouter';
 import configureStore from './store/configureStore';
 import { startSetExpenses } from './actions/expenses';
-import {login, logout } from './actions/auth';
+import { login, logout } from './actions/auth';
+import getVisibleExpenses from './selectors/expenses';
 import 'normalize.css/normalize.css';
-import './styles/style.scss';
+import './styles/styles.scss';
 import 'react-dates/lib/css/_datepicker.css';
 import { firebase } from './firebase/firebase';
 
-
 const store = configureStore();
-
-const jxs = (
-    <Provider store={store}>
-        <AppRouter/>
-    </Provider>
+const jsx = (
+  <Provider store={store}>
+    <AppRouter />
+  </Provider>
 );
 let hasRendered = false;
 const renderApp = () => {
-    if (!hasRendered) {
-        ReactDOM.render(jxs, document.getElementById('app'));
-        hasRendered = true; 
-    }
-}
+  if (!hasRendered) {
+    ReactDOM.render(jsx, document.getElementById('app'));
+    hasRendered = true;
+  }
+};
+
 ReactDOM.render(<p>Loading...</p>, document.getElementById('app'));
 
-
-
 firebase.auth().onAuthStateChanged((user) => {
-    if (user) {
-        store.dispatch(login(user.uid));
-        store.dispatch(startSetExpenses()).then(()=>{
-            renderApp();
-            if (history.location.pathname === '/') {
-                history.push('/dashboard');
-            }
-        });
-    } else {
-        store.dispatch(logout());
-        renderApp();
-        history.push('/');
-    }
+  if (user) {
+    store.dispatch(login(user.uid));
+    store.dispatch(startSetExpenses()).then(() => {
+      renderApp();
+      if (history.location.pathname === '/') {
+        history.push('/dashboard');
+      }
+    });
+  } else {
+    console.log('logout');
+    store.dispatch(logout());
+    renderApp();
+    history.push('/');
+  }
 });
